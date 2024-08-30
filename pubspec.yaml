@@ -18,8 +18,7 @@ dependencies:
   cupertino_icons: ^1.0.6
 
   permission_handler: ^11.3.1
-  #  encrypt: ^5.0.3
-  #  aespack: ^0.0.3
+  aespack: ^0.0.3
   vibration: ^1.8.4
   wifi_scan: ^0.4.1
   wifi_connector: ^2.0.0

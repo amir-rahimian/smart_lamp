@@ -81,13 +81,11 @@ class _LampControlState extends State<LampControl> {
     _safeSetState(() {
       _lampState = state;
       _pirMode = pMode;
-      _pirDelay = pDelay;
       delayController.animateToItem(
         _pirDelay,
         duration: const Duration(milliseconds: 400),
         curve: Curves.decelerate,
       );
-      // delayController.jumpToItem(_pirDelay);
     });
   }
 
