@@ -96,7 +96,34 @@ class MainPageState extends State<MainPage> {
   }
 
   void _requestWifiOn() {
-    _showToast('شبکه wifi را فعال کنید !');
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            "شبکه در دسترس نیست !",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text("لطفا شبکه WiFi خود را فعال کنید"),
+          actions: [
+            TextButton(
+              child: const Text("بستن اپلیکیشن"),
+              onPressed: () {
+                Navigator.of(context).popUntil(
+                  (route) => true,
+                ); // dismiss dialog
+              },
+            ),
+            TextButton(
+              child: const Text("باز کردن تنظیمات"),
+              onPressed: () {
+                wifiService.wifiSettings();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _refreshWifiList() async {

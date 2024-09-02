@@ -48,30 +48,22 @@ class _LampControlState extends State<LampControl> {
   }
 
   void _startListeningToUdpMessages() {
-    _udpSubscription = UdpManager().onMessage.listen(_handleUdpMessage);
-  }
-
-  void _requestLampState() {
-    UdpManager().sendMessage('LST');
-  }
-
-  void _handleUdpMessage(String message) {
-    if (message == '*') {
-      _requestLampState();
-    } else if (message.startsWith('L') && message.endsWith('T')) {
-      _updateLampStateFromMessage(message);
-    } else if (message == 'ALERT') {
-      _startAlertVibration();
-    }
-  }
-
-  void _updateLampStateFromMessage(String message) {
-    message = message.substring(1, message.length - 1);
-    if (message.contains('P') && message.length == 6) {
-      _updateLampAndPirState(message);
-    } else if (message.length == 1) {
-      _updateLampState(message[0] == '1');
-    }
+    _udpSubscription = UdpManager().onMessage.listen(
+      (message) {
+        if (message == '*') {
+          UdpManager().sendMessage('LST');
+        } else if (message.startsWith('L') && message.endsWith('T')) {
+          message = message.substring(1, message.length - 1);
+          if (message.contains('P') && message.length == 6) {
+            _updateLampAndPirState(message);
+          } else if (message.length == 1) {
+            _safeSetState(() => _lampState = message[0] == '1');
+          }
+        } else if (message == 'ALERT') {
+          _startAlertVibration();
+        }
+      },
+    );
   }
 
   void _updateLampAndPirState(String message) {
@@ -81,6 +73,7 @@ class _LampControlState extends State<LampControl> {
     _safeSetState(() {
       _lampState = state;
       _pirMode = pMode;
+      _pirDelay = pDelay;
       delayController.animateToItem(
         _pirDelay,
         duration: const Duration(milliseconds: 400),
@@ -89,27 +82,19 @@ class _LampControlState extends State<LampControl> {
     });
   }
 
-  void _updateLampState(bool state) {
-    _safeSetState(() => _lampState = state);
-  }
-
   void _startAlertVibration() {
     if (!mounted) return;
-
     _safeSetState(() => _alert = true);
     const Duration vibrationInterval = Duration(seconds: 1);
     final Duration alertDuration = Duration(seconds: _pirDelay);
-
     _alertTimer?.cancel();
     _alertTimer = Timer.periodic(vibrationInterval, (timer) {
       if (!mounted) {
         timer.cancel();
         return;
       }
-
       Vibration.vibrate(duration: 500, amplitude: 255);
       _safeSetState(() => _alert = !_alert);
-
       if (timer.tick >= alertDuration.inSeconds) {
         timer.cancel();
         _safeSetState(() => _alert = false);
@@ -132,9 +117,7 @@ class _LampControlState extends State<LampControl> {
   }
 
   void _toggleLampState() {
-    _safeSetState(() {
-      _lampState = !_lampState;
-    });
+    _safeSetState(() => _lampState = !_lampState);
     UdpManager().sendMessage("L${_lampState ? '1' : '0'}T");
   }
 

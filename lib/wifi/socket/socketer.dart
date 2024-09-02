@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:smart_lamp/wifi/socket/enc.dart';
-
 class UdpManager {
   static const String _targetIp = '192.168.4.1';
   static const int _port = 8888;
